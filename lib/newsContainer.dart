@@ -1,17 +1,32 @@
 import 'package:flutter/material.dart';
 import 'package:newsapp/api_manager.dart';
+import 'package:newsapp/mainNews.dart';
 import 'package:newsapp/model/newsResponse.dart';
 import 'package:newsapp/model/sourceResponse.dart';
 import 'package:newsapp/myTheme.dart';
 
-class newsContainer extends StatelessWidget {
+class newsContainer extends StatefulWidget {
   Sources sources;
   newsContainer({required this.sources});
 
   @override
+  State<newsContainer> createState() => _newsContainerState();
+}
+
+class _newsContainerState extends State<newsContainer> {
+  final scrollController=ScrollController();
+
+  List<Articles>newss=[];
+@override
+  void initState() {
+  scrollController.addListener(endList);
+    super.initState();
+  }
+  @override
+
   Widget build(BuildContext context) {
     return FutureBuilder<NewsResponse?>(
-      future: apiManager.getNewsBySource(sources.id??''),
+      future: apiManager.getNewsBySource(widget.sources.id??''),
 
         builder: (context,snapshot){
         if(snapshot.connectionState==ConnectionState.waiting){
@@ -38,26 +53,63 @@ class newsContainer extends StatelessWidget {
           );
 
         }
-        var news = snapshot.data?.articles??[];
-        return ListView.builder(itemBuilder: (context,index){
-          return  Container(
-              child:
-              Column(
-                crossAxisAlignment:CrossAxisAlignment.stretch,
-                children: [
-                  Image.network(news[index].urlToImage??''),
-                  Text(news[index].title??'',style: Theme.of(context).textTheme.titleSmall,),
-                  Text(news[index].publishedAt??'',textAlign: TextAlign.right,)
+        var newss = snapshot.data?.articles??[];
+        return ListView.builder(
+          controller: scrollController,
+
+          itemBuilder: (context,index){
+          return  InkWell(
+            onTap: (){
+              Navigator.pushNamed(context, mainNews.routeName,arguments: arg(args: newss[index]));
+
+            },
+            child: Container(padding: EdgeInsets.all(10),
+                child:
+                Column(
+                  crossAxisAlignment:CrossAxisAlignment.stretch,
+                  children: [
+
+                    Container(
+
+                      clipBehavior: Clip.antiAlias,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(18)
+                        ),
+                        child: Image.network(newss[index].urlToImage??'')),
+                    Text(newss[index].author??''),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text(newss[index].title??'',style: Theme.of(context).textTheme.titleSmall,),
+                    ),
+                    Text(newss[index].publishedAt??'',textAlign: TextAlign.right,)
 
 
-                ],
-              ),
+                  ],
+                ),
 
 
+            ),
           );
           },
-          itemCount: news.length,
+          itemCount: newss.length,
           );
         });
   }
+  int page=0;
+  endList()async{
+    if(scrollController.position.pixels >= scrollController.position.maxScrollExtent){
+      page ++ ;
+      // print(pagesize);
+      var newsResponceList = await apiManager.getNewsBySource(widget.sources.id??'',pageNum:page.toString());
+      // print(newsResponceList?.articles?.first.title);
+      // print(newss.length);
+      newss.addAll(newsResponceList?.articles??[]);
+      setState(() {
+      });
+    }
+  }
+}
+class arg{
+  Articles args;
+  arg({required this.args});
 }

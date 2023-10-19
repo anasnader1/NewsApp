@@ -1,27 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:newsapp/api_manager.dart';
+import 'package:newsapp/model/HomeScreenDataClass.dart';
 import 'package:newsapp/model/sourceResponse.dart';
 import 'package:newsapp/myTheme.dart';
 import 'package:newsapp/tabContainer.dart';
 
-class categoryDetails extends StatelessWidget{
+class categoryDetails extends StatefulWidget{
   static const String routeName='categoryDetails';
-
+  Categoryy categoryy;
+  categoryDetails({ required this.categoryy});
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar:
-      AppBar(
-        centerTitle: true,
-        title: Text('News App',
-          style: Theme.of(context).textTheme.titleLarge!.copyWith(color: MyTheme.whiteColor),
-        ),
-        elevation: 0,
+  State<categoryDetails> createState() => _categoryDetailsState();
+}
 
-      ),
-      body: FutureBuilder<SourceResponce?>(
-        future: apiManager.getSources(),
+class _categoryDetailsState extends State<categoryDetails> {
+  @override
+  Widget build(BuildContext context) {
+    return  FutureBuilder<SourceResponce?>(
+        future: apiManager.getSources(widget.categoryy.id),
         builder: (context,snapshot){
           if(snapshot.connectionState==ConnectionState.waiting){
             return Center(
@@ -33,7 +30,9 @@ class categoryDetails extends StatelessWidget{
               return Column(
                 children: [
                   Text('Something went wrong'),
-                  ElevatedButton(onPressed: (){}, child: Text('Try Again'))
+                  ElevatedButton(onPressed: (){
+                    apiManager.getSources(widget.categoryy.id);
+                  }, child: Text('Try Again'))
                 ],
               );
           }
@@ -51,7 +50,7 @@ class categoryDetails extends StatelessWidget{
 
           },
 
-          )
+
 
 
 

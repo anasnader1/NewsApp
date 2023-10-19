@@ -9,13 +9,14 @@ class apiManager{
   static const String baseUrl='newsapi.org';
   static const String sourceApi='/v2/top-headlines/sources';
   static const String newsApi='/v2/everything';
-  static Future<SourceResponce?> getSources ()async{
+  static Future<SourceResponce?> getSources (String categoryId)async{
     /*
     https://newsapi.org/v2/top-headlines/sources?apiKey=193c64fab7f24774bf819c38baf3a34a
      */
     Uri url=Uri.https(baseUrl,sourceApi,
     {
-      'apikey':'193c64fab7f24774bf819c38baf3a34a'
+      'apikey':'193c64fab7f24774bf819c38baf3a34a',
+      'category' : categoryId
     }
     );
     try{
@@ -33,14 +34,19 @@ class apiManager{
 
 
   }
-  static Future<NewsResponse?> getNewsBySource(String SourceId)async{
+  static Future<NewsResponse?> getNewsBySource(String SourceId,{String pageNum='1'})async{
     /*
     https://newsapi.org/v2/everything?q=bitcoin&apiKey=193c64fab7f24774bf819c38baf3a34a
      */
+
     Uri url =Uri.https(baseUrl,newsApi,
     {
       'apikey':'193c64fab7f24774bf819c38baf3a34a',
-      'sources':SourceId
+      'sources':SourceId,
+      "page":pageNum,
+      "pageSize":"20"
+
+
     }
     );
     try{
